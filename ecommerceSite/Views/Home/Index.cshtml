@@ -1,0 +1,138 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .nav{
+            width: 100%;
+            height: 100px;
+        }
+        .nav-items{
+            width: 100%;
+            height: 100%;
+            background-color: beige;
+            list-style: none;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .nav-item{
+            display: inline-block;
+            font-family: sans-serif;
+            position: relative;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+        .nav-item .cat-dropdown{
+            width: 300px;
+            box-shadow: 0 0 10px gray;
+            position: absolute;
+            background: white;
+            top: 100%;
+            padding: 10px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        .nav-item .cat-dropdown .category {
+            padding: 10px 0;
+        }
+        .category:hover{
+            text-decoration: underline;
+        }
+        .nav-item:hover .cat-dropdown{
+             display: block;
+        }
+        .subCat-dropdown{
+            position: absolute;
+            width: 300px;
+            background-color: white;
+            left: 100%;
+            top: 0;
+            display:none;
+        }
+        .category:hover .subCat-dropdown, .subcategory:hover .brand-dropdown{
+            display: block;
+        }
+        .subcategory{
+            padding: 10px 0;
+        }
+        .subcategory:hover{
+            text-decoration: underline;
+        }
+        .brand-dropdown {
+            position: absolute;
+            width: 300px;
+            background-color: red;
+            left: 100%;
+            top: 0;
+            display: none;
+        }
+    </style>
+</head>
+
+
+<nav class="nav">
+    @{ 
+        // y wo jo 'obj' k naam s banwati hain n miss..y wo hai..mein db k naam s banata hoon take pta chale k database hai y.
+        ecommerceSite.Models.ECommEntities db = new ecommerceSite.Models.ECommEntities();
+    }
+    <ul class="nav-items">
+        <li class="nav-item">Home</li>
+        <li class="nav-item">
+            Category
+            <ul class="cat-dropdown">
+                @* sab s pehle jitne bhi category hain db.Categories mein *@
+                @foreach (ecommerceSite.Models.Category category in db.Categories)
+                {
+                    // unke naam print krdo
+                    <li class="category">@category.Name
+                    
+                        @*  phir jitne bhi SubCategory hain jin ki CategoryID..
+                            jo bhi loop mein abhi category chal rhi hai...uske ID k barabar ho..
+                            wo sab var subcategories mein save krdo. 
+                            Note krna k Where() mein FirstOrDefault() nhi lagaya. 
+                            wo sirf ek instance return krti hai(jo bhi pehle mile)...jis p loop nhi chalasakte...
+                            agr y na lagaya(jese meine kiya hai) to ek list type cheez return krta hai..
+                            chahe us mein ek hi element kiyun na ho..
+                            *@
+                        @{ var subcategories = db.SubCategories.Where(sc => sc.CategoryID == category.ID); }
+                        <ul class="subCat-dropdown">
+                    
+                            @* ab subcategories p loop chale ga *@
+                            @foreach (ecommerceSite.Models.SubCategory subcategory in subcategories)
+                            {
+                                // subcat k naam
+                                <li class="subcategory">@subcategory.Name
+                                    <ul class="brand-dropdown">
+                                        
+                                        @* same as subcategories...jo bhi abhi subcat chal rhi hai..
+                                            agr uski ID BrandSubCategory wale table mein hai 
+                                            to wo sari rows (jidhr subCatID mein iski ID k brabr ho)..utha k brandsubs mein save krde ga*@
+                                        @{ var brandsubs = db.BrandSubCategories.Where(sc => sc.SubCategoryID == subcategory.ID); }
+                                        
+                                        @foreach(ecommerceSite.Models.BrandSubCategory brandsub in brandsubs)
+                                        {
+                                            //phir...finally...us subCat k jis jis brand s relation bana ho..
+                                            //un brand k naam print krdo 
+                                            // 🤩🤩🤩
+                                            <li class="brand">@brandsub.Brand.Name</li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </li>
+        <li class="nav-item">Contact</li>
+        <li class="nav-item">About</li>
+
+    </ul>
+</nav>
